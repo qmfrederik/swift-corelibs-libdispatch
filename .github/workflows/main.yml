@@ -1,0 +1,25 @@
+name: libdispatch
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        toolset: [ v143 ]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Build
+      run: |
+        mkdir build
+        cd build
+        cmake .. -T ${{ matrix.toolset }}
+        cmake --build .
+    - name: Test
+      run: |
+        cd build
+        ctest
