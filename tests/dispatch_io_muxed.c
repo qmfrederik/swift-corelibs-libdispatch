@@ -174,12 +174,12 @@ test_socket_muxed(void)
 {
 	printf("\nSocket Muxed\n");
 
-	int listenfd = -1, serverfd = -1, clientfd = -1;
+	SOCKET listenfd = INVALID_SOCKET, serverfd = INVALID_SOCKET, clientfd = INVALID_SOCKET;
 	struct sockaddr_in addr;
 	socklen_t addrlen;
 
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (listenfd == -1) {
+	if (listenfd == INVALID_SOCKET ) {
 		test_errno("socket()", errno, 0);
 		test_stop();
 	}
@@ -201,7 +201,7 @@ test_socket_muxed(void)
 	}
 
 	clientfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (clientfd == -1) {
+	if (clientfd == INVALID_SOCKET) {
 		test_errno("socket()", errno, 0);
 		test_stop();
 	}
@@ -211,7 +211,7 @@ test_socket_muxed(void)
 	}
 
 	serverfd = accept(listenfd, (struct sockaddr *)&addr, &addrlen);
-	if (serverfd == -1) {
+	if (serverfd == INVALID_SOCKET) {
 		test_errno("accept()", errno, 0);
 		test_stop();
 	}

@@ -192,6 +192,8 @@ _dispatch_workq_init_wct(void *hWCTSession)
 	*(HWCT **)hWCTSession = OpenThreadWaitChainSession(0, NULL);
 }
 
+#define WCT_MAX_NODE_COUNT 16
+
 static void
 _dispatch_workq_count_runnable_workers(dispatch_workq_monitor_t mon)
 {

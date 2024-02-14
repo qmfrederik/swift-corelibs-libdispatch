@@ -617,7 +617,7 @@ dispatch_block_wait(dispatch_block_t db, dispatch_time_t timeout)
 				"run more than once and waited for");
 	}
 
-	long ret = dispatch_group_wait(dbpd->dbpd_group, timeout);
+	intptr_t ret = dispatch_group_wait(dbpd->dbpd_group, timeout);
 
 	if (boost_th) {
 		_dispatch_thread_override_end(boost_th, dbpd);
@@ -4053,7 +4053,7 @@ static const struct dispatch_queue_global_s _dispatch_custom_workloop_root_queue
 #endif // TARGET_OS_MAC
 
 static void
-_dispatch_workloop_activate_attributes(dispatch_workloop_t dwl)
+_dispatch_workloop_activate_attributes(dispatch_workloop_t __attribute__((unused)) dwl)
 {
 #if defined(_POSIX_THREADS)
 	dispatch_workloop_attr_t dwla = dwl->dwl_attr;

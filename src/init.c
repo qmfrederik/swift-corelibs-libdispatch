@@ -1151,7 +1151,7 @@ _dispatch_logv_init(void *context DISPATCH_UNUSED)
 					(int)tv.tv_usec);
 			if (len > 0) {
 				len = MIN(len, (int)sizeof(szMessage) - 1);
-				_write(dispatch_logfile, szMessage, len);
+				_write(dispatch_logfile, szMessage, (unsigned int)len);
 				_write(dispatch_logfile, "\n", 1);
 			}
 #else

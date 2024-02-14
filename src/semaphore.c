@@ -92,7 +92,7 @@ _dispatch_semaphore_signal_slow(dispatch_semaphore_t dsema)
 intptr_t
 dispatch_semaphore_signal(dispatch_semaphore_t dsema)
 {
-	long value = os_atomic_inc2o(dsema, dsema_value, release);
+	long value = (long)os_atomic_inc2o(dsema, dsema_value, release);
 	if (likely(value > 0)) {
 		return 0;
 	}
@@ -108,7 +108,7 @@ static intptr_t
 _dispatch_semaphore_wait_slow(dispatch_semaphore_t dsema,
 		dispatch_time_t timeout)
 {
-	long orig;
+	intptr_t orig;
 
 	_dispatch_sema4_create(&dsema->dsema_sema, _DSEMA4_POLICY_FIFO);
 	switch (timeout) {
@@ -138,7 +138,7 @@ _dispatch_semaphore_wait_slow(dispatch_semaphore_t dsema,
 intptr_t
 dispatch_semaphore_wait(dispatch_semaphore_t dsema, dispatch_time_t timeout)
 {
-	long value = os_atomic_dec2o(dsema, dsema_value, acquire);
+	long value = (long)os_atomic_dec2o(dsema, dsema_value, acquire);
 	if (likely(value >= 0)) {
 		return 0;
 	}

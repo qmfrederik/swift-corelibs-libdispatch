@@ -448,7 +448,7 @@ test_start(const char* desc)
 	if (desc) {
 		fprintf(stdout, "\n==================================================\n");
 		fprintf(stdout, "[TEST] %s\n", desc);
-		fprintf(stdout, "[PID] %d\n", getpid());
+		fprintf(stdout, "[PID] %d\n", (int)getpid());
 		fprintf(stdout, "==================================================\n\n");
 		fflush(stdout);
 	}

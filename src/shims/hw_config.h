@@ -43,6 +43,10 @@
 #error "could not determine pointer size as a constant int"
 #endif // __SIZEOF_POINTER__
 
+#if __MINGW32__
+#define __popcnt64 __builtin_popcountll
+#endif
+
 #define DISPATCH_CACHELINE_SIZE 64u
 #define ROUND_UP_TO_CACHELINE_SIZE(x) \
 		(((x) + (DISPATCH_CACHELINE_SIZE - 1u)) & \
@@ -154,19 +158,19 @@ _dispatch_hw_get_config(_dispatch_hw_config_t c)
 		switch (slpiCurrent->Relationship) {
 		case RelationProcessorCore:
 			++dwProcessorPhysicalCount;
-			dwProcessorLogicalCount += __popcnt64(slpiCurrent->ProcessorMask);
+			dwProcessorLogicalCount += (DWORD)__popcnt64(slpiCurrent->ProcessorMask);
 			break;
-#if defined(DISPATCH_HAVE_EXTENDED_SLPI_20348)
+#if defined(DISPATCH_HAVE_EXTENDED_SLPI_20348) || defined(__MINGW32__)
 		case RelationProcessorDie:
 #endif
 		case RelationProcessorPackage:
 		case RelationNumaNode:
-#if defined(DISPATCH_HAVE_EXTENDED_SLPI_20348)
+#if defined(DISPATCH_HAVE_EXTENDED_SLPI_20348) || defined(__MINGW32__)
 		case RelationNumaNodeEx:
 #endif
 		case RelationCache:
 		case RelationGroup:
-#if defined(DISPATCH_HAVE_EXTENDED_SLPI_22000)
+#if defined(DISPATCH_HAVE_EXTENDED_SLPI_22000) || defined(__MINGW32__)
 		case RelationProcessorModule:
 #endif
 		case RelationAll:

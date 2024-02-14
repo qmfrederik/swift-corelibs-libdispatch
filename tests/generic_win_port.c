@@ -99,21 +99,21 @@ argv_to_command_line(char **argv)
 			} else {
 				// Widen as many characters as possible.
 				size_t mb_len = strcspn(cur, "\"\\");
-				int wide_len = MultiByteToWideChar(CP_UTF8, 0, cur, mb_len,
+				int wide_len = MultiByteToWideChar(CP_UTF8, 0, cur, (int)mb_len,
 						NULL, 0);
 				if (wide_len == 0) {
 					goto error;
 				}
-				if (!expand_wstr(&cmdline, &capacity, len + wide_len)) {
+				if (!expand_wstr(&cmdline, &capacity, len + (size_t)wide_len)) {
 					goto error;
 				}
-				wide_len = MultiByteToWideChar(CP_UTF8, 0, cur, mb_len,
+				wide_len = MultiByteToWideChar(CP_UTF8, 0, cur, (int)mb_len,
 						&cmdline[len], wide_len);
 				if (wide_len == 0) {
 					goto error;
 				}
 				cur += mb_len;
-				len += wide_len;
+				len += (size_t)wide_len;
 			}
 		}
 		if (quoted && !append_wstr(&cmdline, &capacity, &len, L"\"")) {
@@ -180,7 +180,7 @@ gettimeofday(struct timeval *tp, void *tzp)
 	GetSystemTimePreciseAsFileTime(&ft);
 	int64_t ticks = ft.dwLowDateTime | (((int64_t)ft.dwHighDateTime) << 32);
 	ticks -= 116444736000000000LL;  // Convert to Unix time
-	FILETIME unix_ft = {.dwLowDateTime = (DWORD)ticks, .dwHighDateTime = ticks >> 32};
+	FILETIME unix_ft = {.dwLowDateTime = (DWORD)ticks, .dwHighDateTime = (DWORD)(ticks >> 32)};
 	filetime_to_timeval(tp, &unix_ft);
 	return 0;
 }
@@ -189,7 +189,7 @@ typedef void (WINAPI *QueryUnbiasedInterruptTimePreciseT)(PULONGLONG);
 static QueryUnbiasedInterruptTimePreciseT QueryUnbiasedInterruptTimePrecisePtr;
 
 static BOOL WINAPI
-mach_absolute_time_init(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpContext)
+mach_absolute_time_init(PINIT_ONCE __attribute__((__unused__)) InitOnce, PVOID __attribute__((__unused__)) Parameter, PVOID __attribute__((__unused__)) *lpContext)
 {
 	// QueryUnbiasedInterruptTimePrecise() is declared in the Windows headers
 	// but it isn't available in any import libraries. We must manually load it
@@ -222,6 +222,7 @@ mach_absolute_time(void)
 	return result * 100;  // Convert from 100ns units
 }
 
+#ifndef __MINGW32__
 static void
 randomize_name(char *out)
 {
@@ -257,6 +258,7 @@ mkstemp(char *tmpl)
 	errno = EEXIST;
 	return -1;
 }
+#endif
 
 void
 print_winapi_error(const char *function_name, DWORD error)

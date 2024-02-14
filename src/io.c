@@ -2419,7 +2419,9 @@ _dispatch_operation_perform(dispatch_operation_t op)
 #else
 	off_t off = (off_t)((size_t)op->offset + op->total);
 #endif
-#if defined(_WIN32)
+#if defined(__MINGW32__)
+	int processed = -1;
+#elif defined(_WIN32)
 	long processed = -1;
 #else
 	ssize_t processed = -1;
@@ -2431,7 +2433,7 @@ syscall:
 			HANDLE hFile = (HANDLE)op->fd_entry->fd;
 			BOOL bSuccess;
 			if (_dispatch_handle_is_socket(hFile)) {
-				processed = recv((SOCKET)hFile, buf, len, 0);
+				processed = recv((SOCKET)hFile, buf, (int)len, 0);
 				if (processed < 0) {
 					bSuccess = FALSE;
 					err = WSAGetLastError();
@@ -2496,7 +2498,7 @@ syscall:
 			HANDLE hFile = (HANDLE)op->fd_entry->fd;
 			BOOL bSuccess;
 			if (_dispatch_handle_is_socket(hFile)) {
-				processed = send((SOCKET)hFile, buf, len, 0);
+				processed = send((SOCKET)hFile, buf, (int)len, 0);
 				if (processed < 0) {
 					bSuccess = FALSE;
 					err = WSAGetLastError();

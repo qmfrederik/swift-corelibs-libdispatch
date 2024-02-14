@@ -72,12 +72,14 @@ int
 main(int argc, char** argv)
 {
 	struct hostent *he;
-	int sockfd = -1, clientfd = -1;
+	SOCKET sockfd = INVALID_SOCKET, clientfd = INVALID_SOCKET;
 	dispatch_fd_t read_fd = -1, fd = -1;
 	struct sockaddr_in addr1, addr2, server;
 	socklen_t addr2len;
 	socklen_t addr1len;
+#if !defined(_WIN32)
 	pid_t clientid;
+#endif
 
 #if defined(_WIN32)
 	WSADATA wsa;
@@ -92,7 +94,7 @@ main(int argc, char** argv)
 		// Client
 		dispatch_test_start(NULL);
 
-		if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+		if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
 			test_errno("Client-socket()", errno, 0);
 			test_stop();
 		}
@@ -162,7 +164,7 @@ main(int argc, char** argv)
 			dispatch_release(g_d2);
 			g_d2 = concat;
 			if (!error && dispatch_data_get_size(d2)) {
-				dispatch_read(sockfd, SIZE_MAX,
+				dispatch_read((dispatch_fd_t)sockfd, SIZE_MAX,
 						dispatch_get_global_queue(0, 0), b);
 			} else {
 				g_error = error;
@@ -170,7 +172,7 @@ main(int argc, char** argv)
 			}
 		});
 		dispatch_group_enter(g);
-		dispatch_read(sockfd, SIZE_MAX, dispatch_get_global_queue(0, 0), b);
+		dispatch_read((dispatch_fd_t)sockfd, SIZE_MAX, dispatch_get_global_queue(0, 0), b);
 		test_group_wait(g);
 		test_errno("Client-read error", g_error, 0);
 		test_long("Client-dispatch data size", (long)dispatch_data_get_size(g_d2),
@@ -198,7 +200,7 @@ main(int argc, char** argv)
 		// Server
 		dispatch_test_start("Dispatch IO Network test");
 
-		if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+		if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == 0) {
 			test_errno("Server-socket()", errno, 0);
 			test_stop();
 		}
@@ -277,7 +279,6 @@ main(int argc, char** argv)
 			print_winapi_error("CreateProcessW", error);
 			test_stop();
 		}
-		clientid = (pid_t)pi.dwProcessId;
 #elif defined(__unix__)
 		clientid = fork();
 		if (clientid == -1) {
@@ -296,7 +297,7 @@ main(int argc, char** argv)
 
 		addr2len = sizeof(struct sockaddr_in);
 		clientfd = accept(sockfd, (struct sockaddr *)&addr2, &addr2len);
-		if(clientfd == -1) {
+		if(clientfd == 0) {
 			test_errno("Server-accept()", errno, 0);
 			goto stop_test;
 		}
@@ -332,7 +333,7 @@ main(int argc, char** argv)
 				test_stop();
 			}
 			dispatch_group_enter(g);
-			dispatch_write(clientfd, d, dispatch_get_global_queue(0, 0),
+			dispatch_write((dispatch_fd_t)clientfd, d, dispatch_get_global_queue(0, 0),
 					^(dispatch_data_t remaining, int w_err) {
 				test_errno("Server-write error", w_err, 0);
 				test_ptr_null("Server-dispatch write remaining data",remaining);

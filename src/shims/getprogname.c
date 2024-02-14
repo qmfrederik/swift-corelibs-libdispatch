@@ -35,8 +35,10 @@ static INIT_ONCE getprogname_init_once = INIT_ONCE_STATIC_INIT;
 static TCHAR progname[_MAX_FNAME];
 
 static BOOL CALLBACK
-getprogname_init_once_handler(PINIT_ONCE InitOnce, PVOID Parameter,
-	PVOID *lpContext)
+getprogname_init_once_handler(
+	PINIT_ONCE __attribute__((unused)) InitOnce,
+	PVOID __attribute__((unused)) Parameter,
+	PVOID __attribute__((unused)) *lpContext)
 {
 	TCHAR path[MAX_PATH];
 	DWORD length = GetModuleFileName(NULL, path, sizeof(path));

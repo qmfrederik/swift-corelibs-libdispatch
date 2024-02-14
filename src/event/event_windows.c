@@ -279,7 +279,7 @@ _dispatch_pipe_monitor_thread(void *context)
 		OVERLAPPED ov = {0};
 		BOOL bSuccess = ReadFile(hPipe, cBuffer, /* nNumberOfBytesToRead */ 0,
 				&dwNumberOfBytesTransferred, &ov);
-		DWORD dwBytesAvailable;
+		DWORD dwBytesAvailable = 0;
 		DWORD dwError = GetLastError();
 		if (!bSuccess && dwError == ERROR_IO_PENDING) {
 			bSuccess = GetOverlappedResult(hPipe, &ov,
@@ -348,8 +348,8 @@ _dispatch_pipe_write_availability(HANDLE hPipe)
 }
 
 static VOID CALLBACK
-_dispatch_socket_callback(PTP_CALLBACK_INSTANCE inst, void *context,
-		PTP_WAIT pwa, TP_WAIT_RESULT res)
+_dispatch_socket_callback(PTP_CALLBACK_INSTANCE __attribute__((unused)) inst, void *context,
+		PTP_WAIT pwa, TP_WAIT_RESULT __attribute__((unused)) res)
 {
 	dispatch_muxnote_t dmn = (dispatch_muxnote_t)context;
 	SOCKET sock = (SOCKET)dmn->dmn_ident;
@@ -526,7 +526,7 @@ _dispatch_unote_register_muxed(dispatch_unote_t du)
 
 	events = _dispatch_unote_required_events(du);
 
-	dmb = _dispatch_unote_muxnote_bucket(du._du->du_ident);
+	dmb = _dispatch_unote_muxnote_bucket((uint32_t)du._du->du_ident);
 	dmn = _dispatch_unote_muxnote_find(dmb, du._du->du_ident,
 		du._du->du_filter);
 	if (dmn) {
@@ -771,8 +771,8 @@ _dispatch_event_merge_timer(dispatch_clock_t clock)
 }
 
 static void CALLBACK
-_dispatch_timer_callback(PTP_CALLBACK_INSTANCE Instance, PVOID Context,
-	PTP_TIMER Timer)
+_dispatch_timer_callback(PTP_CALLBACK_INSTANCE __attribute__((unused)) Instance, PVOID Context,
+	PTP_TIMER __attribute__((unused)) Timer)
 {
 	BOOL bSuccess;
 
@@ -796,8 +796,8 @@ _dispatch_event_loop_timer_arm(dispatch_timer_heap_t dth DISPATCH_UNUSED,
 	switch (DISPATCH_TIMER_CLOCK(tidx)) {
 	case DISPATCH_CLOCK_WALL:
 		timer = &_dispatch_windows_timeout[DISPATCH_CLOCK_WALL];
-		liTime.QuadPart = range.delay +
-			_dispatch_time_now_cached(DISPATCH_TIMER_CLOCK(tidx), nows);
+		liTime.QuadPart = (LONGLONG)(range.delay +
+			(uint64_t)_dispatch_time_now_cached(DISPATCH_TIMER_CLOCK(tidx), nows));
 		break;
 
 	case DISPATCH_CLOCK_UPTIME:
@@ -816,8 +816,8 @@ _dispatch_event_loop_timer_arm(dispatch_timer_heap_t dth DISPATCH_UNUSED,
 		}
 	}
 
-	ftDueTime.dwHighDateTime = liTime.HighPart;
-	ftDueTime.dwLowDateTime = liTime.LowPart;
+	ftDueTime.dwHighDateTime = (DWORD)liTime.HighPart;
+	ftDueTime.dwLowDateTime = (DWORD)liTime.LowPart;
 
 	SetThreadpoolTimer(timer->pTimer, &ftDueTime, /*msPeriod=*/0,
 		/*msWindowLength=*/0);

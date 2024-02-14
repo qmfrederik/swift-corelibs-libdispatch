@@ -80,7 +80,7 @@ void
 _dispatch_once(dispatch_once_t *predicate,
 		DISPATCH_NOESCAPE dispatch_block_t block)
 {
-	if (DISPATCH_EXPECT(*predicate, ~0l) != ~0l) {
+	if (DISPATCH_EXPECT((long)*predicate, ~0l) != ~0l) {
 		dispatch_once(predicate, block);
 	} else {
 		dispatch_compiler_barrier();
@@ -107,7 +107,7 @@ void
 _dispatch_once_f(dispatch_once_t *predicate, void *_Nullable context,
 		dispatch_function_t function)
 {
-	if (DISPATCH_EXPECT(*predicate, ~0l) != ~0l) {
+	if (DISPATCH_EXPECT((long)*predicate, ~0l) != ~0l) {
 		dispatch_once_f(predicate, context, function);
 	} else {
 		dispatch_compiler_barrier();

@@ -478,7 +478,7 @@ _dispatch_futex_unlock_pi(uint32_t *uaddr, int opflags)
 
 int
 _dispatch_wait_on_address(uint32_t volatile *_address, uint32_t value,
-		dispatch_time_t timeout, dispatch_lock_options_t flags)
+		dispatch_time_t timeout, dispatch_lock_options_t __attribute__((__unused__)) flags)
 {
 	uint32_t *address = (uint32_t *)_address;
 	uint64_t nsecs = _dispatch_timeout(timeout);
@@ -513,7 +513,7 @@ _dispatch_wait_on_address(uint32_t volatile *_address, uint32_t value,
 	// Integral division will truncate, so make sure that we do the roundup.
 	DWORD dwMilliseconds =
 		nsecs == DISPATCH_TIME_FOREVER
-			? INFINITE : ((nsecs + 1000000) / 1000000);
+			? INFINITE : (DWORD)((nsecs + 1000000) / 1000000);
 	if (dwMilliseconds == 0) return ETIMEDOUT;
 	return WaitOnAddress(address, &value, sizeof(value), dwMilliseconds) == TRUE;
 #else
@@ -689,7 +689,7 @@ _dispatch_once_wait(dispatch_once_gate_t dgo)
 		_dispatch_futex_wait(lock, (dispatch_lock)new_v, NULL,
 				FUTEX_PRIVATE_FLAG);
 #else
-		_dispatch_thread_switch(new_v, 0, timeout++);
+		_dispatch_thread_switch((dispatch_lock)new_v, 0, timeout++);
 #endif
 		(void)timeout;
 	}

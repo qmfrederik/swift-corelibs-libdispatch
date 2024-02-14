@@ -25,9 +25,17 @@ typedef __typeof__(_Generic((__SIZE_TYPE__)0,                                  \
 			    unsigned short : (short)0,                         \
 			    unsigned char : (signed char)0)) ssize_t;
 
+#ifndef S_ISDIR
 #define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
+#endif
+
+#ifndef S_ISFIFO
 #define S_ISFIFO(mode) ((mode) & _S_IFIFO)
+#endif
+
+#ifndef S_ISREG
 #define S_ISREG(mode)  ((mode) & _S_IFREG)
+#endif
 #define S_ISSOCK(mode) 0
 
 #define O_NONBLOCK 04000
@@ -49,10 +57,13 @@ bool _dispatch_handle_is_socket(HANDLE hFile);
 void _dispatch_QueryInterruptTimePrecise(PULONGLONG lpInterruptTimePrecise);
 void _dispatch_QueryUnbiasedInterruptTimePrecise(PULONGLONG lpUnbiasedInterruptTimePrecise);
 
+#if !defined(__MINGW32__)
 enum {
 	FilePipeLocalInformation = 24,
 };
+#endif
 
+#if !defined(__MINGW32__)
 typedef struct _FILE_PIPE_LOCAL_INFORMATION {
 	ULONG NamedPipeType;
 	ULONG NamedPipeConfiguration;
@@ -65,6 +76,7 @@ typedef struct _FILE_PIPE_LOCAL_INFORMATION {
 	ULONG NamedPipeState;
 	ULONG NamedPipeEnd;
 } FILE_PIPE_LOCAL_INFORMATION, *PFILE_PIPE_LOCAL_INFORMATION;
+#endif
 
 NTSTATUS _dispatch_NtQueryInformationFile(HANDLE FileHandle,
 		PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length,

@@ -177,7 +177,7 @@ dispatch_source_get_extended_data(dispatch_source_t ds,
 			data = DISPATCH_SOURCE_GET_DATA(combined);
 			status = DISPATCH_SOURCE_GET_STATUS(combined);
 		} else {
-			data = dispatch_source_get_data(ds);
+			data = (unsigned long)dispatch_source_get_data(ds);
 		}
 		if (size >= offsetof(struct dispatch_source_extended_data_s, data)
 				+ sizeof(edata->data)) {

@@ -319,10 +319,10 @@ dispatch_test_fd_pread(dispatch_fd_t fd, void *buf, size_t count, off_t offset)
 	OVERLAPPED overlapped;
 	memset(&overlapped, 0, sizeof(overlapped));
 	LARGE_INTEGER lioffset = {.QuadPart = offset};
-	overlapped.Offset = lioffset.LowPart;
-	overlapped.OffsetHigh = lioffset.HighPart;
+	overlapped.Offset = (DWORD)lioffset.LowPart;
+	overlapped.OffsetHigh = (DWORD)lioffset.HighPart;
 	DWORD num_read;
-	if (!ReadFile((HANDLE)fd, buf, count, &num_read, &overlapped)) {
+	if (!ReadFile((HANDLE)fd, buf, (DWORD)count, &num_read, &overlapped)) {
 		print_winapi_error("ReadFile", GetLastError());
 		errno = EIO;
 		return -1;
@@ -340,7 +340,7 @@ dispatch_test_fd_read(dispatch_fd_t fd, void *buf, size_t count)
 	if (GetFileType((HANDLE)fd) == FILE_TYPE_PIPE) {
 		OVERLAPPED ov = {0};
 		DWORD num_read;
-		BOOL success = ReadFile((HANDLE)fd, buf, count, &num_read, &ov);
+		BOOL success = ReadFile((HANDLE)fd, buf, (DWORD)count, &num_read, &ov);
 		if (!success && GetLastError() == ERROR_IO_PENDING) {
 			success = GetOverlappedResult((HANDLE)fd, &ov, &num_read,
 					/* bWait */ TRUE);
@@ -353,7 +353,7 @@ dispatch_test_fd_read(dispatch_fd_t fd, void *buf, size_t count)
 		return (ssize_t)num_read;
 	}
 	DWORD num_read;
-	if (!ReadFile((HANDLE)fd, buf, count, &num_read, NULL)) {
+	if (!ReadFile((HANDLE)fd, buf, (DWORD)count, &num_read, NULL)) {
 		print_winapi_error("ReadFile", GetLastError());
 		errno = EIO;
 		return -1;
@@ -371,7 +371,7 @@ dispatch_test_fd_write(dispatch_fd_t fd, const void *buf, size_t count)
 	if (GetFileType((HANDLE)fd) == FILE_TYPE_PIPE) {
 		OVERLAPPED ov = {0};
 		DWORD num_written;
-		BOOL success = WriteFile((HANDLE)fd, buf, count, &num_written, &ov);
+		BOOL success = WriteFile((HANDLE)fd, buf, (DWORD)count, &num_written, &ov);
 		if (!success && GetLastError() == ERROR_IO_PENDING) {
 			success = GetOverlappedResult((HANDLE)fd, &ov, &num_written,
 					/* bWait */ TRUE);
@@ -384,7 +384,7 @@ dispatch_test_fd_write(dispatch_fd_t fd, const void *buf, size_t count)
 		return (ssize_t)num_written;
 	}
 	DWORD num_written;
-	if (!WriteFile((HANDLE)fd, buf, count, &num_written, NULL)) {
+	if (!WriteFile((HANDLE)fd, buf, (DWORD)count, &num_written, NULL)) {
 		print_winapi_error("WriteFile", GetLastError());
 		errno = EIO;
 		return -1;
