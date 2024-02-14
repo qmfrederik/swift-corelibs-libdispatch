@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        toolset: [ v143 ]
+        toolset: [ v143, ClangCL ]
     steps:
     - uses: actions/checkout@v3
     - uses: ilammy/msvc-dev-cmd@v1
