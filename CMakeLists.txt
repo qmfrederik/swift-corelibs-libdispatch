@@ -18,7 +18,7 @@ if("${CMAKE_C_SIMULATE_ID}" STREQUAL "MSVC")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-  if(NOT MINGW)
+  if("${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
     include(DispatchWindowsSupport)
     dispatch_windows_arch_spelling(${CMAKE_SYSTEM_PROCESSOR} DISPATCH_MSVC_ARCH)
     dispatch_windows_include_for_arch(${DISPATCH_MSVC_ARCH} DISPATCH_INCLUDES)
